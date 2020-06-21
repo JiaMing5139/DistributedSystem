@@ -1,4 +1,0 @@
-/home/parallels/CLionProjects/Distributed_lab/Rpc/CMakeFiles/edit_cache.dir
-/home/parallels/CLionProjects/Distributed_lab/Rpc/CMakeFiles/client.dir
-/home/parallels/CLionProjects/Distributed_lab/Rpc/CMakeFiles/rebuild_cache.dir
-/home/parallels/CLionProjects/Distributed_lab/Rpc/CMakeFiles/server.dir
