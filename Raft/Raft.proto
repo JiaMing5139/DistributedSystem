@@ -4,9 +4,10 @@ package rpcService;
 
 message AppendEntriesRequest {
     int64 term  = 1;
-    int64 leaderId  = 2;
-    int32 prevLogIndex = 3;
-    int32 prevLogTerm =4;
+    string leaderId  = 2;
+    int64 prevLogIndex = 3;
+    int64 prevLogTerm =4;
+
 
     message LogEntry{
         int64 index = 1;
@@ -15,6 +16,7 @@ message AppendEntriesRequest {
         bytes command = 4;
     }
     repeated LogEntry LogEntries = 5;
+    int64 leaderCommit =6 ;
 }
 
 message AppendEntriesResponse {

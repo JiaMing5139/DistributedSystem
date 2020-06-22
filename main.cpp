@@ -47,6 +47,7 @@ int main(int argc,char ** argv) {
 
     Raft rpcServer(loop,localaddr,points);
     rpcServer.start();
+
     loop->loop();
     return 0;
 }

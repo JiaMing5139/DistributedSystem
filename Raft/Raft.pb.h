@@ -401,10 +401,11 @@ class AppendEntriesRequest PROTOBUF_FINAL :
 
   enum : int {
     kLogEntriesFieldNumber = 5,
-    kTermFieldNumber = 1,
     kLeaderIdFieldNumber = 2,
+    kTermFieldNumber = 1,
     kPrevLogIndexFieldNumber = 3,
     kPrevLogTermFieldNumber = 4,
+    kLeaderCommitFieldNumber = 6,
   };
   // repeated .rpcService.AppendEntriesRequest.LogEntry LogEntries = 5;
   int logentries_size() const;
@@ -424,6 +425,31 @@ class AppendEntriesRequest PROTOBUF_FINAL :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::rpcService::AppendEntriesRequest_LogEntry >&
       logentries() const;
 
+  // string leaderId = 2;
+  void clear_leaderid();
+  const std::string& leaderid() const;
+  void set_leaderid(const std::string& value);
+  void set_leaderid(std::string&& value);
+  void set_leaderid(const char* value);
+  void set_leaderid(const char* value, size_t size);
+  std::string* mutable_leaderid();
+  std::string* release_leaderid();
+  void set_allocated_leaderid(std::string* leaderid);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_leaderid();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_leaderid(
+      std::string* leaderid);
+  private:
+  const std::string& _internal_leaderid() const;
+  void _internal_set_leaderid(const std::string& value);
+  std::string* _internal_mutable_leaderid();
+  public:
+
   // int64 term = 1;
   void clear_term();
   ::PROTOBUF_NAMESPACE_ID::int64 term() const;
@@ -433,31 +459,31 @@ class AppendEntriesRequest PROTOBUF_FINAL :
   void _internal_set_term(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // int64 leaderId = 2;
-  void clear_leaderid();
-  ::PROTOBUF_NAMESPACE_ID::int64 leaderid() const;
-  void set_leaderid(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_leaderid() const;
-  void _internal_set_leaderid(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // int32 prevLogIndex = 3;
+  // int64 prevLogIndex = 3;
   void clear_prevlogindex();
-  ::PROTOBUF_NAMESPACE_ID::int32 prevlogindex() const;
-  void set_prevlogindex(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::int64 prevlogindex() const;
+  void set_prevlogindex(::PROTOBUF_NAMESPACE_ID::int64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_prevlogindex() const;
-  void _internal_set_prevlogindex(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_prevlogindex() const;
+  void _internal_set_prevlogindex(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // int32 prevLogTerm = 4;
+  // int64 prevLogTerm = 4;
   void clear_prevlogterm();
-  ::PROTOBUF_NAMESPACE_ID::int32 prevlogterm() const;
-  void set_prevlogterm(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::int64 prevlogterm() const;
+  void set_prevlogterm(::PROTOBUF_NAMESPACE_ID::int64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_prevlogterm() const;
-  void _internal_set_prevlogterm(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_prevlogterm() const;
+  void _internal_set_prevlogterm(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // int64 leaderCommit = 6;
+  void clear_leadercommit();
+  ::PROTOBUF_NAMESPACE_ID::int64 leadercommit() const;
+  void set_leadercommit(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_leadercommit() const;
+  void _internal_set_leadercommit(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
   // @@protoc_insertion_point(class_scope:rpcService.AppendEntriesRequest)
@@ -468,10 +494,11 @@ class AppendEntriesRequest PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::rpcService::AppendEntriesRequest_LogEntry > logentries_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr leaderid_;
   ::PROTOBUF_NAMESPACE_ID::int64 term_;
-  ::PROTOBUF_NAMESPACE_ID::int64 leaderid_;
-  ::PROTOBUF_NAMESPACE_ID::int32 prevlogindex_;
-  ::PROTOBUF_NAMESPACE_ID::int32 prevlogterm_;
+  ::PROTOBUF_NAMESPACE_ID::int64 prevlogindex_;
+  ::PROTOBUF_NAMESPACE_ID::int64 prevlogterm_;
+  ::PROTOBUF_NAMESPACE_ID::int64 leadercommit_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_Raft_2eproto;
 };
@@ -1283,62 +1310,123 @@ inline void AppendEntriesRequest::set_term(::PROTOBUF_NAMESPACE_ID::int64 value)
   // @@protoc_insertion_point(field_set:rpcService.AppendEntriesRequest.term)
 }
 
-// int64 leaderId = 2;
+// string leaderId = 2;
 inline void AppendEntriesRequest::clear_leaderid() {
-  leaderid_ = PROTOBUF_LONGLONG(0);
+  leaderid_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppendEntriesRequest::_internal_leaderid() const {
-  return leaderid_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int64 AppendEntriesRequest::leaderid() const {
+inline const std::string& AppendEntriesRequest::leaderid() const {
   // @@protoc_insertion_point(field_get:rpcService.AppendEntriesRequest.leaderId)
   return _internal_leaderid();
 }
-inline void AppendEntriesRequest::_internal_set_leaderid(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  
-  leaderid_ = value;
-}
-inline void AppendEntriesRequest::set_leaderid(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void AppendEntriesRequest::set_leaderid(const std::string& value) {
   _internal_set_leaderid(value);
   // @@protoc_insertion_point(field_set:rpcService.AppendEntriesRequest.leaderId)
 }
-
-// int32 prevLogIndex = 3;
-inline void AppendEntriesRequest::clear_prevlogindex() {
-  prevlogindex_ = 0;
+inline std::string* AppendEntriesRequest::mutable_leaderid() {
+  // @@protoc_insertion_point(field_mutable:rpcService.AppendEntriesRequest.leaderId)
+  return _internal_mutable_leaderid();
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppendEntriesRequest::_internal_prevlogindex() const {
+inline const std::string& AppendEntriesRequest::_internal_leaderid() const {
+  return leaderid_.Get();
+}
+inline void AppendEntriesRequest::_internal_set_leaderid(const std::string& value) {
+  
+  leaderid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void AppendEntriesRequest::set_leaderid(std::string&& value) {
+  
+  leaderid_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:rpcService.AppendEntriesRequest.leaderId)
+}
+inline void AppendEntriesRequest::set_leaderid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  leaderid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:rpcService.AppendEntriesRequest.leaderId)
+}
+inline void AppendEntriesRequest::set_leaderid(const char* value,
+    size_t size) {
+  
+  leaderid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:rpcService.AppendEntriesRequest.leaderId)
+}
+inline std::string* AppendEntriesRequest::_internal_mutable_leaderid() {
+  
+  return leaderid_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* AppendEntriesRequest::release_leaderid() {
+  // @@protoc_insertion_point(field_release:rpcService.AppendEntriesRequest.leaderId)
+  return leaderid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void AppendEntriesRequest::set_allocated_leaderid(std::string* leaderid) {
+  if (leaderid != nullptr) {
+    
+  } else {
+    
+  }
+  leaderid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), leaderid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:rpcService.AppendEntriesRequest.leaderId)
+}
+inline std::string* AppendEntriesRequest::unsafe_arena_release_leaderid() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:rpcService.AppendEntriesRequest.leaderId)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return leaderid_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void AppendEntriesRequest::unsafe_arena_set_allocated_leaderid(
+    std::string* leaderid) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (leaderid != nullptr) {
+    
+  } else {
+    
+  }
+  leaderid_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      leaderid, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:rpcService.AppendEntriesRequest.leaderId)
+}
+
+// int64 prevLogIndex = 3;
+inline void AppendEntriesRequest::clear_prevlogindex() {
+  prevlogindex_ = PROTOBUF_LONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppendEntriesRequest::_internal_prevlogindex() const {
   return prevlogindex_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppendEntriesRequest::prevlogindex() const {
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppendEntriesRequest::prevlogindex() const {
   // @@protoc_insertion_point(field_get:rpcService.AppendEntriesRequest.prevLogIndex)
   return _internal_prevlogindex();
 }
-inline void AppendEntriesRequest::_internal_set_prevlogindex(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void AppendEntriesRequest::_internal_set_prevlogindex(::PROTOBUF_NAMESPACE_ID::int64 value) {
   
   prevlogindex_ = value;
 }
-inline void AppendEntriesRequest::set_prevlogindex(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void AppendEntriesRequest::set_prevlogindex(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _internal_set_prevlogindex(value);
   // @@protoc_insertion_point(field_set:rpcService.AppendEntriesRequest.prevLogIndex)
 }
 
-// int32 prevLogTerm = 4;
+// int64 prevLogTerm = 4;
 inline void AppendEntriesRequest::clear_prevlogterm() {
-  prevlogterm_ = 0;
+  prevlogterm_ = PROTOBUF_LONGLONG(0);
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppendEntriesRequest::_internal_prevlogterm() const {
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppendEntriesRequest::_internal_prevlogterm() const {
   return prevlogterm_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 AppendEntriesRequest::prevlogterm() const {
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppendEntriesRequest::prevlogterm() const {
   // @@protoc_insertion_point(field_get:rpcService.AppendEntriesRequest.prevLogTerm)
   return _internal_prevlogterm();
 }
-inline void AppendEntriesRequest::_internal_set_prevlogterm(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void AppendEntriesRequest::_internal_set_prevlogterm(::PROTOBUF_NAMESPACE_ID::int64 value) {
   
   prevlogterm_ = value;
 }
-inline void AppendEntriesRequest::set_prevlogterm(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void AppendEntriesRequest::set_prevlogterm(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _internal_set_prevlogterm(value);
   // @@protoc_insertion_point(field_set:rpcService.AppendEntriesRequest.prevLogTerm)
 }
@@ -1380,6 +1468,26 @@ inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::rpcService::AppendEntr
 AppendEntriesRequest::logentries() const {
   // @@protoc_insertion_point(field_list:rpcService.AppendEntriesRequest.LogEntries)
   return logentries_;
+}
+
+// int64 leaderCommit = 6;
+inline void AppendEntriesRequest::clear_leadercommit() {
+  leadercommit_ = PROTOBUF_LONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppendEntriesRequest::_internal_leadercommit() const {
+  return leadercommit_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 AppendEntriesRequest::leadercommit() const {
+  // @@protoc_insertion_point(field_get:rpcService.AppendEntriesRequest.leaderCommit)
+  return _internal_leadercommit();
+}
+inline void AppendEntriesRequest::_internal_set_leadercommit(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  
+  leadercommit_ = value;
+}
+inline void AppendEntriesRequest::set_leadercommit(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_leadercommit(value);
+  // @@protoc_insertion_point(field_set:rpcService.AppendEntriesRequest.leaderCommit)
 }
 
 // -------------------------------------------------------------------

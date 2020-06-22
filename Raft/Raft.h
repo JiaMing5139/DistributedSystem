@@ -165,13 +165,10 @@ private:
 
     void heartBeat();
 
-    class LogEntry {
-
-    };
 
     int64_t currentTerm = 1;
     std::string votedFor;
-    std::vector<LogEntry> Logs;
+    std::vector<rpcService::AppendEntriesRequest_LogEntry> logs_;
 
     int64_t getVoteNum = 0;//used in follow
 
