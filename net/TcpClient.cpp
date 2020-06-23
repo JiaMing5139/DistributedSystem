@@ -8,7 +8,8 @@
 TcpClient::TcpClient(EventLoop *loop, const InetAddress &addr):
 connector_(loop,addr),
 baseloop_(loop),
-status_(closed)
+status_(closed),
+peerAddr(addr)
 {
 
 }
@@ -22,7 +23,8 @@ void TcpClient::disconnect(){
 void TcpClient::start() {
     if(status_ == closed){
         status_ = connecting;
-        connector_.setNewConnectionCallback(bind(&TcpClient::newConnection,this,std::placeholders::_1));
+        connector_.setNewConnectionCallback(std::bind(&TcpClient::newConnection,this,std::placeholders::_1));
+        connector_.setConnectFaildCallback(std::bind(&TcpClient::connectionFaild,this,std::placeholders::_1));
         connector_.start();
 
     }
@@ -67,4 +69,10 @@ void TcpClient::removeTcpConnection() {
 
 void TcpClient::send(const std::string & msg) {
     tcpConnectionptr_->send(msg);
+}
+
+void TcpClient::connectionFaild(int savederrno){
+    LOG_INFO<<"connection to :"<< peerAddr<< " failed! errno:" << savederrno;
+    tcpConnectionptr_.reset();
+    status_ =closed;
 }

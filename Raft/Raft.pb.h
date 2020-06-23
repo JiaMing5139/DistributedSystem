@@ -197,7 +197,6 @@ class AppendEntriesRequest_LogEntry PROTOBUF_FINAL :
 
   enum : int {
     kCommandNameFieldNumber = 3,
-    kCommandFieldNumber = 4,
     kIndexFieldNumber = 1,
     kTermFieldNumber = 2,
   };
@@ -226,31 +225,6 @@ class AppendEntriesRequest_LogEntry PROTOBUF_FINAL :
   std::string* _internal_mutable_commandname();
   public:
 
-  // bytes command = 4;
-  void clear_command();
-  const std::string& command() const;
-  void set_command(const std::string& value);
-  void set_command(std::string&& value);
-  void set_command(const char* value);
-  void set_command(const void* value, size_t size);
-  std::string* mutable_command();
-  std::string* release_command();
-  void set_allocated_command(std::string* command);
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  std::string* unsafe_arena_release_command();
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  void unsafe_arena_set_allocated_command(
-      std::string* command);
-  private:
-  const std::string& _internal_command() const;
-  void _internal_set_command(const std::string& value);
-  std::string* _internal_mutable_command();
-  public:
-
   // int64 index = 1;
   void clear_index();
   ::PROTOBUF_NAMESPACE_ID::int64 index() const;
@@ -277,7 +251,6 @@ class AppendEntriesRequest_LogEntry PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr commandname_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
   ::PROTOBUF_NAMESPACE_ID::int64 index_;
   ::PROTOBUF_NAMESPACE_ID::int64 term_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
@@ -1203,87 +1176,6 @@ inline void AppendEntriesRequest_LogEntry::unsafe_arena_set_allocated_commandnam
   commandname_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       commandname, GetArena());
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:rpcService.AppendEntriesRequest.LogEntry.commandName)
-}
-
-// bytes command = 4;
-inline void AppendEntriesRequest_LogEntry::clear_command() {
-  command_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline const std::string& AppendEntriesRequest_LogEntry::command() const {
-  // @@protoc_insertion_point(field_get:rpcService.AppendEntriesRequest.LogEntry.command)
-  return _internal_command();
-}
-inline void AppendEntriesRequest_LogEntry::set_command(const std::string& value) {
-  _internal_set_command(value);
-  // @@protoc_insertion_point(field_set:rpcService.AppendEntriesRequest.LogEntry.command)
-}
-inline std::string* AppendEntriesRequest_LogEntry::mutable_command() {
-  // @@protoc_insertion_point(field_mutable:rpcService.AppendEntriesRequest.LogEntry.command)
-  return _internal_mutable_command();
-}
-inline const std::string& AppendEntriesRequest_LogEntry::_internal_command() const {
-  return command_.Get();
-}
-inline void AppendEntriesRequest_LogEntry::_internal_set_command(const std::string& value) {
-  
-  command_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void AppendEntriesRequest_LogEntry::set_command(std::string&& value) {
-  
-  command_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:rpcService.AppendEntriesRequest.LogEntry.command)
-}
-inline void AppendEntriesRequest_LogEntry::set_command(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  command_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:rpcService.AppendEntriesRequest.LogEntry.command)
-}
-inline void AppendEntriesRequest_LogEntry::set_command(const void* value,
-    size_t size) {
-  
-  command_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:rpcService.AppendEntriesRequest.LogEntry.command)
-}
-inline std::string* AppendEntriesRequest_LogEntry::_internal_mutable_command() {
-  
-  return command_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* AppendEntriesRequest_LogEntry::release_command() {
-  // @@protoc_insertion_point(field_release:rpcService.AppendEntriesRequest.LogEntry.command)
-  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void AppendEntriesRequest_LogEntry::set_allocated_command(std::string* command) {
-  if (command != nullptr) {
-    
-  } else {
-    
-  }
-  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:rpcService.AppendEntriesRequest.LogEntry.command)
-}
-inline std::string* AppendEntriesRequest_LogEntry::unsafe_arena_release_command() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:rpcService.AppendEntriesRequest.LogEntry.command)
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  
-  return command_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      GetArena());
-}
-inline void AppendEntriesRequest_LogEntry::unsafe_arena_set_allocated_command(
-    std::string* command) {
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  if (command != nullptr) {
-    
-  } else {
-    
-  }
-  command_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      command, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:rpcService.AppendEntriesRequest.LogEntry.command)
 }
 
 // -------------------------------------------------------------------

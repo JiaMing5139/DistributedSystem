@@ -35,6 +35,9 @@ void Connector::connect() {
     int ret = sockets::connect(fd, serverAddr_.getSockaddr());
     if (ret < 0 && errno != EINTR ) {
         LOG_TRACE << "connect failed: " <<  serverAddr_;
+        if(connectFaildCallback)
+             connectFaildCallback(errno);
+        state_ = kDisconnected;
     }else{
         newConnectionCallback_(fd);
     }

@@ -7,6 +7,7 @@
 #include "Rpc/RpcServer.h"
 
 #include "Raft/Raft.h"
+#include "Service/Service.h"
 void testEchoserver() {
     EventLoop *loop= new EventLoop;
 
@@ -27,7 +28,19 @@ void testEchoserver() {
 }
 
 void testRaft() {
-
+//    int16_t port = atoi( argv[1]);
+//    EventLoop *loop= new EventLoop;
+//    InetAddress localaddr(port);
+//    std::vector<InetAddress> points;
+//    for(int i = 2 ; i < argc ; i ++){
+//
+//        points.push_back(std::move(InetAddress(atoi( argv[i]))));
+//    }
+//
+//    Raft rpcServer(loop,localaddr,points);
+//    rpcServer.start();
+//
+//    loop->loop();
 }
 
 int main(int argc,char ** argv) {
@@ -35,19 +48,19 @@ int main(int argc,char ** argv) {
         perror("local port peer port1 port2 port3..");
         return 0;
     }
-    Jimmy::Logger::setLevel(Jimmy::Logger::INFO);
     int16_t port = atoi( argv[1]);
     EventLoop *loop= new EventLoop;
     InetAddress localaddr(port);
     std::vector<InetAddress> points;
     for(int i = 2 ; i < argc ; i ++){
 
-      points.push_back(std::move(InetAddress(atoi( argv[i]))));
+        points.push_back(std::move(InetAddress(atoi( argv[i]))));
     }
-
-    Raft rpcServer(loop,localaddr,points);
-    rpcServer.start();
-
+    Jimmy::Logger::setLevel(Jimmy::Logger::INFO);
+    Service service(loop,localaddr,points);
+    service.start();
+    //service.appendLog("get","5");
+    loop->runEvery(10,std::bind(&Service::appendLog,&service,"get ","5",1));
     loop->loop();
     return 0;
 }

@@ -9,6 +9,7 @@
 #include "InetAddress.h"
 #include <memory>
 #include <atomic>
+#include <utility>
     class Channel;
     class EventLoop;
 
@@ -24,6 +25,10 @@
 
         void setNewConnectionCallback(const NewConnectionCallback& cb)
         { newConnectionCallback_ = cb; }
+
+        void setConnectFaildCallback(const std::function<void (int)>& cb){
+            connectFaildCallback = cb;
+        }
 
         void start();  // can be called in any thread
         void restart();  // must be called in loop thread
@@ -53,6 +58,7 @@
         std::atomic<States> state_;
         std::shared_ptr<Channel> channelptr_;
         NewConnectionCallback newConnectionCallback_;
+        std::function<void (int)> connectFaildCallback;
         int retryDelayMs_;
     };
 

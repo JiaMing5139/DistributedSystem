@@ -23,7 +23,7 @@ add_executable(Distributed_lab
         ${Timer_LIB_SRCS}
         ${RPC_LIB_SRCS}
         ${Raft_LIB_SRCS}
-        Raft/State.cpp Raft/State.h)
+        Raft/State.cpp Raft/State.h Service/Service.cpp Service/Service.h Service/kvService.cpp Service/kvService.h)
 find_package(Protobuf REQUIRED)
 find_package (Threads REQUIRED)
 target_link_libraries(Distributed_lab

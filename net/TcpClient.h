@@ -33,11 +33,12 @@ public:
     void setOnWriteCompleteCallback(TcpEventCallback cb){writeCompleteCallback =cb;}
 private:
     readTcpEventCallback onMessage_;
-
+    InetAddress peerAddr;
     TcpEventCallback onConnection_;
     TcpEventCallback closeCallback;
     TcpEventCallback writeCompleteCallback;
     void removeTcpConnection();
+    void connectionFaild(int);
 
 
     std::atomic<status> status_;

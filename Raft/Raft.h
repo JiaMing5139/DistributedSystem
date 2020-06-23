@@ -43,7 +43,6 @@ public:
 
 
     void requestVote(rpcService::RequestVoteRequest request, RpcResponseCallback cb) {
-        LOG_INFO << "prepare to  requestVote ";
         responseCallback_ = cb;
         client_.setOnConnectionCallback(std::bind(&RpcClient::onSendRquestVote, this, request, std::placeholders::_1));
        // client_.setOnConnectionCallback(std::bind(&RpcClient::testonConnection, this, std::placeholders::_1));
@@ -90,7 +89,7 @@ private:
 
     void onSendAppendEntry(rpcService::AppendEntriesRequest request, const TcpConnectionPtr &conn) {
         assert(conn);
-        LOG_INFO << conn->localAddr() << "->" << conn->peerAddr() << "connection , start to send AppendEntriesRequest";
+        LOG_INFO << conn->localAddr() << "->" << conn->peerAddr() << " connected, start to send AppendEntriesRequest";
         channel_->setConnection(const_cast<TcpConnectionPtr &>(conn));
         rpcService::AppendEntriesResponse *response = new rpcService::AppendEntriesResponse;
         google::protobuf::Message *response_t = response;
@@ -100,7 +99,7 @@ private:
     void onSendRquestVote(rpcService::RequestVoteRequest request, const TcpConnectionPtr &conn) {
         assert(conn);
         channel_->setConnection(const_cast<TcpConnectionPtr &>(conn));
-        LOG_INFO << conn->localAddr() << "->" << conn->peerAddr() << "connection , start to send RequestVoteRequest";
+        LOG_INFO << conn->localAddr() << "->" << conn->peerAddr() << " connected , start to send RequestVoteRequest";
         rpcService::RequestVoteResponse *response = new rpcService::RequestVoteResponse;
         google::protobuf::Message *response_t = response;
         RaftServiceStub_.Vote(NULL, &request, response, NewCallback(this, &RpcClient::solved, response_t));
@@ -130,6 +129,7 @@ private:
 
 
 };
+class Service;
 
 class Raft {
 public:
@@ -143,11 +143,19 @@ public:
 
     Raft(EventLoop *eventLoop, const InetAddress &addr);
 
-    Raft(EventLoop *eventLoop, const InetAddress &addr, const std::vector<InetAddress> &clientAddrs);
+    Raft(EventLoop *eventLoop, const InetAddress &addr, const std::vector<InetAddress> &clientAddrs,Service *service);
 
     void debugRaft();
 
     void start();
+
+    void appendLog(const std::string& operation,const std::string& command);
+
+    void appendLogInloop(const std::string& operation,const std::string& command);
+
+    status getStatus(){
+        return status_;
+    }
 
 private:
     void onAppendEntryMessage(google::protobuf::RpcController *controller,
@@ -182,6 +190,8 @@ private:
     RpcServer server_;
     std::atomic<status> status_;
     std::string raftName_;
+
+    Service* service_;
 
 
     TimerId electionTimer;
