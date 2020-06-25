@@ -6,11 +6,13 @@
 #define DISTRIBUTED_LAB_SERVICE_H
 
 #include "EventLoopThread.h"
+#include "kvServiceImpl.h"
 #include <google/protobuf/message.h>
 #include <map>
 #include <Raft/Raft.h>
 
 class EventLoop;
+
 class Service {
 public:
     enum   status{
@@ -30,7 +32,9 @@ public:
     Raft::status getState();
 
     // applyaLog to Service
-    void applyCommand(int64_t id,bool commandVaild,std::string operation,std::string commandName);
+    void applyCommand(int64_t id,bool commandVaild,const std::string& operation,const std::string& commandName);
+
+
 
 private:
     struct waitngResponse{
@@ -47,8 +51,8 @@ private:
     EventLoop * baseloop_;
     Raft * raft_;
     std::vector<InetAddress> clients_;
-    TcpServer tcpserver_;
-
+    RpcServer rpcServer_;
+    kvServiceImpl kvService1_;
     std::map<int64_t , waitngResponse > waitngResponse_;
 
 

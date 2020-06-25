@@ -76,3 +76,12 @@ void TcpClient::connectionFaild(int savederrno){
     tcpConnectionptr_.reset();
     status_ =closed;
 }
+
+void TcpClient::resetConnection() {
+    if(tcpConnectionptr_){
+        tcpConnectionptr_.reset();
+    }
+    status_=closed;
+
+}
+

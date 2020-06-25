@@ -34,6 +34,10 @@
         void restart();  // must be called in loop thread
         void stop();  // can be called in any thread
 
+        void setServerAddress(const InetAddress & serverAddr){
+            serverAddr_ = serverAddr;
+        }
+
         const InetAddress& serverAddress() const { return serverAddr_; }
 
     private:

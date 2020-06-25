@@ -156,6 +156,7 @@ public:
     status getStatus(){
         return status_;
     }
+    InetAddress getLeader();
 
 private:
     void onAppendEntryMessage(google::protobuf::RpcController *controller,
@@ -193,7 +194,7 @@ private:
 
     Service* service_;
 
-
+    std::atomic<char*> leader;
     TimerId electionTimer;
     TimerId appendEntryTimer;
 

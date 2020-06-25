@@ -1,0 +1,29 @@
+
+
+syntax = "proto3";
+option cc_generic_services =true;
+package kvService;
+
+//enum operation{
+//    GET = 0;
+//    PUT = 2;
+//}
+
+message kvRequest {
+    uint64 id=1;
+    string operation =2;
+    string key=3;
+    string value=4;
+}
+
+
+message kvReponse {
+    uint64 id=1;
+    string leader=2;
+    bool success=3;
+}
+
+
+service kvService{
+    rpc kvCommand(kvRequest) returns(kvReponse);
+}

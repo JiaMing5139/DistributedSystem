@@ -60,7 +60,7 @@ int main(int argc,char ** argv) {
     Service service(loop,localaddr,points);
     service.start();
     //service.appendLog("get","5");
-    loop->runEvery(10,std::bind(&Service::appendLog,&service,"get ","5",1));
+    //loop->runEvery(10,std::bind(&Service::appendLog,&service,"get ","5",1));
     loop->loop();
     return 0;
 }

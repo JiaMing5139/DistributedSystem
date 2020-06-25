@@ -71,7 +71,8 @@ Raft::Raft(EventLoop *eventLoop, const InetAddress &addr, const std::vector<Inet
         loop_(eventLoop),
         server_(eventLoop, addr),
         status_(kClosed),
-        service_(service) {
+        service_(service),
+        leader(new char[64]){
     for (auto &addr : clientAddrs) {
         RpcClientPtr clientPtr(new RpcClient(eventLoop, addr));
         clients_.push_back(std::move(clientPtr));
@@ -183,6 +184,7 @@ void Raft::electionTimeout() {
 void
 Raft::onRequestVoteEntryMessage(google::protobuf::RpcController *controller, const ::google::protobuf::Message *request,
                                 ::google::protobuf::Message *response, ::google::protobuf::Closure *done) {
+
     rpcService::RequestVoteResponse *requestVoteResponse = static_cast< rpcService::RequestVoteResponse * >(response);
     ::google::protobuf::Message *request_tmp = const_cast< ::google::protobuf::Message *>(request);
     rpcService::RequestVoteRequest *requestVoteRequest = static_cast< rpcService::RequestVoteRequest * >(request_tmp);
@@ -246,6 +248,9 @@ void Raft::onAppendEntryMessage(google::protobuf::RpcController *controller, con
         AppendEntriesResponse->set_success(false);
         AppendEntriesResponse->set_term(currentTerm);
     } else { // cuurent <= AppendEntriesResponse->term()
+       // leader = appendEntriesRequest->leaderid();
+
+        memcpy(leader,appendEntriesRequest->leaderid().c_str(),appendEntriesRequest->leaderid().size());
         currentTerm = appendEntriesRequest->term();
         AppendEntriesResponse->set_term(currentTerm);
         loop_->cancleTimer(electionTimer);
@@ -270,14 +275,20 @@ void Raft::onAppendEntryMessage(google::protobuf::RpcController *controller, con
                     AppendEntriesResponse->set_success(true);
                     if (!appendEntriesRequest->logentries().empty()) {
                         const auto &log1 = appendEntriesRequest->logentries();
-                        logs_.push_back(log1[0]);
+                        //logs_.push_back(log1[0]);
+                        if(logs_.size() ==  log1[0].index())
+                            logs_.resize(log1[0].index()*2);
+                        logs_[log1[0].index()] = log1[0];
+                        AppendEntriesResponse->set_index(log1[0].index());
+                    }else{
+                        AppendEntriesResponse->set_index(appendEntriesRequest->prevlogindex());
                     }
-                    AppendEntriesResponse->set_index(logs_.size() - 1);
+
 
 
                     if (appendEntriesRequest->leadercommit() > commitIndex) {
                         commitIndex = appendEntriesRequest->leadercommit() > logs_.back().index()
-                                      ? logs_[logs_.size()].index() : appendEntriesRequest->leadercommit();
+                                      ? logs_[logs_.size() - 1].index() : appendEntriesRequest->leadercommit();
                     }
                 }
             }
@@ -431,6 +442,22 @@ void Raft::appendLogInloop(const std::string &operation, const std::string &comm
         // service.applyMsg
     }
     // service.applyMsg
+}
+
+InetAddress Raft::getLeader() {
+    if(status_==kLeader){
+        return addr_;
+    }else{
+       char * leadertmp = leader;
+       if(strlen(leader)){
+           return InetAddress(0);
+       }
+       char* it = std::find(leadertmp,leadertmp+strlen(leadertmp),':');
+       std::string ip(leadertmp,it);
+       std::string port(it+1,leadertmp+strlen(leadertmp));
+       InetAddress ret (ip.c_str(),atoi(port.c_str()));
+       return ret;
+    }
 }
 
 

@@ -7,15 +7,25 @@
 Service::Service(EventLoop *eventLoop, const InetAddress &addr, const std::vector<InetAddress> &clientAddrs) :
         baseloop_(eventLoop),
         clients_(clientAddrs),
-        tcpserver_(addr, eventLoop) {
+        rpcServer_(eventLoop,addr)
+        {
+
     EventLoop *RaftLoop = eventLoopThread_.startLoop();
-    raft_ = new Raft(RaftLoop, addr, clientAddrs, this);
+    auto local = clientAddrs.front();
+    std::vector<InetAddress> nodes(clientAddrs.begin()+1,clientAddrs.end());
+    raft_ = new Raft(RaftLoop, local, nodes, this);
+
+
+    kvService1_.setonKvCommandMessge(std::bind(&Service::onClientMessage,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,std::placeholders::_4));
+    rpcServer_.registerService(&kvService1_);
     status_ = kClosed;
+
 }
 
 void Service::start() {
     if (status_ == kClosed) {
-        raft_->start();
+    raft_->start();
+    rpcServer_.start();
     }
 
 }
@@ -34,7 +44,7 @@ Raft::status Service::getState() {
 }
 
 
-void Service::applyCommand(int64_t id, bool commandVaild, std::string operation, std::string commandName) {
+void Service::applyCommand(int64_t id, bool commandVaild, const std::string& operation, const std::string& commandName) {
 
     auto it = waitngResponse_.find(id);
     if (it != waitngResponse_.end()) {
@@ -51,19 +61,41 @@ void Service::applyCommand(int64_t id, bool commandVaild, std::string operation,
 void Service::onClientMessage(google::protobuf::RpcController *controller, const ::google::protobuf::Message *request,
                               ::google::protobuf::Message *response, ::google::protobuf::Closure *done) {
     //get request command
-
+    auto *kvReponse = static_cast< kvService::kvReponse * >(response);
+    auto *request_tmp = const_cast< ::google::protobuf::Message *>(request);
+    auto *kvRequest = static_cast< kvService::kvRequest * >(request_tmp);
     //get a id from
     //commandId is for syns the client and service
     //commind = reequest.Id
 
-    int commandId_ = 0;
-    auto it = waitngResponse_.find(commandId_);
-    if (it != waitngResponse_.end()) {   // already in
-    } else {
-        appendLog("get", "5", commandId_);
-        waitngResponse waitngResponse = {response, done};
-        waitngResponse_[commandId_] = waitngResponse;
+    LOG_INFO << kvRequest->operation();
+    LOG_INFO << kvRequest->key();
+    LOG_INFO << kvRequest->value();
+
+    if(raft_->getStatus() ==Raft::kLeader){
+
+        int commandId_ = 0;
+        auto it = waitngResponse_.find(commandId_);
+        if (it != waitngResponse_.end()) {   // already in
+
+        } else {
+            appendLog( kvRequest->operation(), kvRequest->key(), commandId_);
+            waitngResponse waitngResponse = {response, done};
+            waitngResponse_[commandId_] = waitngResponse;
+        }
+
+    }else{
+        kvReponse->set_success(false);
+        raft_->getLeader();
+        std::ostringstream os;
+        os << raft_->getLeader();
+        kvReponse->set_leader(os.str());
+        done->Run();
     }
+
+
+
+
 
 }
 

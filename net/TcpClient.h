@@ -23,10 +23,16 @@ public:
     };
 
     typedef std::shared_ptr<TcpConnection> TcpConnectionptr;
+    explicit TcpClient(EventLoop * loop);
     TcpClient(EventLoop * loop,const InetAddress & addr );
     void start() ;
     void disconnect();
     void send(const std::string & msg);
+    void setServerAdder(const InetAddress & address){
+        connector_.setServerAddress((address));
+        peerAddr = address;
+    }
+    void resetConnection();
     TcpConnectionptr connection(){return tcpConnectionptr_;}
     void setOnMessageCallback(readTcpEventCallback cb){onMessage_ =cb;}
     void setOnConnectionCallback(TcpEventCallback cb){onConnection_ =cb;}
