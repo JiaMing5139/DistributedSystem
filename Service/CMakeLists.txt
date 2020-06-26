@@ -24,7 +24,6 @@ add_executable(kvClient
         ${BASE_LIB_SRCS}
         ${Timer_LIB_SRCS}
         ${RPC_LIB_SRCS}
-        ${Raft_LIB_SRCS}
          ServiceClient.h ServiceClient.cpp serviceMessage.pb.cc serviceMessage.pb.h)
 find_package(Protobuf REQUIRED)
 find_package (Threads REQUIRED)

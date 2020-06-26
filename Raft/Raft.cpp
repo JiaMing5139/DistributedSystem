@@ -4,6 +4,7 @@
 
 #include "Raft.h"
 #include "log/logger.h"
+#include "Service/Service.h"
 #include <sstream>
 
 namespace raft {
@@ -72,7 +73,7 @@ Raft::Raft(EventLoop *eventLoop, const InetAddress &addr, const std::vector<Inet
         server_(eventLoop, addr),
         status_(kClosed),
         service_(service),
-        leader(new char[64]){
+        leader(new char[64]) {
     for (auto &addr : clientAddrs) {
         RpcClientPtr clientPtr(new RpcClient(eventLoop, addr));
         clients_.push_back(std::move(clientPtr));
@@ -130,13 +131,14 @@ void Raft::electionTimeout() {
             LOG_INFO << "getVoteNum" << getVoteNum;
             request.set_term(currentTerm);
             request.set_candidatename(raftName_);
+            request.set_lastlogindex(logs_.back().index());
+            request.set_lastlogterm(logs_.back().term());
             for (auto &client :clients_) {
                 LOG_INFO << raftName_ << "->" << client->clientName() << " send RequestVote";
                 client->requestVote(request, [&](google::protobuf::Message *response) {
                     LOG_INFO << raftName_ << "<-" << client->clientName() << " get RequestVote Rsponse";
                     rpcService::RequestVoteResponse *requestVoteResponse = static_cast< rpcService::RequestVoteResponse * >(response);
                     if (status_ == kCandidate) {
-
                         LOG_INFO << "recv RequestVoteResponse term: " << requestVoteResponse->term();
                         LOG_INFO << "recv RequestVoteResponse votegranted: " << requestVoteResponse->votegranted();
                         if (requestVoteResponse->term() > currentTerm) {
@@ -159,7 +161,7 @@ void Raft::electionTimeout() {
                                 loop_->cancleTimer(electionTimer);
                             }
                         }
-                    }else if(status_ == kFollower){
+                    } else if (status_ == kFollower) {
                         if (requestVoteResponse->term() > currentTerm) {
                             LOG_INFO << "recv RequestVoteResponse: peer term:" << requestVoteResponse->term()
                                      << "Follower: current term:" << currentTerm << " So currertTerm = peerTerm";
@@ -198,8 +200,17 @@ Raft::onRequestVoteEntryMessage(google::protobuf::RpcController *controller, con
                 LOG_INFO << "handing RequestVoteRequest"
                          << "return false  |because currentTerm >  requestVoteRequest->term()";
                 requestVoteResponse->set_votegranted(false);
-            } else if (currentTerm < requestVoteRequest->term()) {
-                if(status_ == kLeader)
+            }else if(logs_.back().term() > requestVoteRequest->lastlogterm()){
+                LOG_INFO << "handing RequestVoteRequest"
+                         << "return false  |because log is too old ";
+                requestVoteResponse->set_votegranted(false);
+            } else if(logs_.back().term() == requestVoteRequest->lastlogterm() && logs_.back().index() > requestVoteRequest->lastlogindex()){
+                LOG_INFO << "handing RequestVoteRequest"
+                         << "return false  |because log is too old ";
+                requestVoteResponse->set_votegranted(false);
+            }
+            else if (currentTerm < requestVoteRequest->term()) {
+                if (status_ == kLeader)
                     status_ = kFollower;
                 votedFor = requestVoteRequest->candidatename();
                 currentTerm = requestVoteRequest->term();
@@ -248,9 +259,9 @@ void Raft::onAppendEntryMessage(google::protobuf::RpcController *controller, con
         AppendEntriesResponse->set_success(false);
         AppendEntriesResponse->set_term(currentTerm);
     } else { // cuurent <= AppendEntriesResponse->term()
-       // leader = appendEntriesRequest->leaderid();
+        // leader = appendEntriesRequest->leaderid();
 
-        memcpy(leader,appendEntriesRequest->leaderid().c_str(),appendEntriesRequest->leaderid().size());
+        memcpy(leader, appendEntriesRequest->leaderid().c_str(), appendEntriesRequest->leaderid().size());
         currentTerm = appendEntriesRequest->term();
         AppendEntriesResponse->set_term(currentTerm);
         loop_->cancleTimer(electionTimer);
@@ -261,7 +272,8 @@ void Raft::onAppendEntryMessage(google::protobuf::RpcController *controller, con
             case kLeader: {
                 status_ = kFollower;
             }
-            case kCandidate: status_ = kFollower;
+            case kCandidate:
+                status_ = kFollower;
             case kFollower: {
 
                 if (appendEntriesRequest->prevlogindex() > logs_.size() or
@@ -276,14 +288,13 @@ void Raft::onAppendEntryMessage(google::protobuf::RpcController *controller, con
                     if (!appendEntriesRequest->logentries().empty()) {
                         const auto &log1 = appendEntriesRequest->logentries();
                         //logs_.push_back(log1[0]);
-                        if(logs_.size() ==  log1[0].index())
-                            logs_.resize(log1[0].index()*2);
+                        if (logs_.size() == log1[0].index())
+                            logs_.resize(log1[0].index() * 2);
                         logs_[log1[0].index()] = log1[0];
                         AppendEntriesResponse->set_index(log1[0].index());
-                    }else{
+                    } else {
                         AppendEntriesResponse->set_index(appendEntriesRequest->prevlogindex());
                     }
-
 
 
                     if (appendEntriesRequest->leadercommit() > commitIndex) {
@@ -331,6 +342,7 @@ void Raft::debugRaft() {
     debug_info << "CurrentTerm: " << currentTerm << std::endl;
     debug_info << "CommitInedx: " << commitIndex << std::endl;
     debug_info << "votedFOr   : " << votedFor << std::endl;
+    debug_info << "appliedIndex:" << lastApplied << std::endl;
     debug_info << "peer            nextIndex       matchIndex      vote Granted" << std::endl;
     for (auto &client:clients_) {
         debug_info << client->clientName();
@@ -346,7 +358,8 @@ void Raft::debugRaft() {
         debug_info << "\n";
     }
     for (const auto &log : logs_) {
-        debug_info << log.commandname() << " term:" << log.term();
+        debug_info << log.commandname() << "term:" << log.term() << "\n";
+        debug_info << "=======" << "\n";
     }
     std::cout << debug_info.str() << std::endl;
 }
@@ -390,13 +403,21 @@ void Raft::AppendEntryTimeout() {
                         client->setMatchIndex(AppendEntriesResponse->index());
                         client->setNextInedex(client->matchIndex() + 1);
                         // start to jungement if need to commit
-                        if (logs_[client->matchIndex()].term() == currentTerm) { //only commite the log in leaer current term
+                        if (logs_[client->matchIndex()].term() ==
+                            currentTerm) { //only commite the log in leaer current term
                             int count = 1;
                             for (auto &client : clients_) {
                                 if (client->matchIndex() == AppendEntriesResponse->index()) {
                                     count++;
                                     if (count > clients_.size() / 2) {
                                         commitIndex = AppendEntriesResponse->index();
+                                        while (commitIndex > lastApplied) {
+                                            lastApplied++;
+                                            auto id = indexAndMsgMap_[lastApplied];
+                                            service_->applyCommand(id, true,
+                                                                   logs_[lastApplied].commandname());
+
+                                        }
                                     }
                                 }
                             }
@@ -421,18 +442,19 @@ void Raft::AppendEntryTimeout() {
 
 }
 
-void Raft::appendLog(const std::string &operation, const std::string &command) {
+void Raft::appendLog(const std::string &operation, const std::string &command, int64_t id) {
 
-    loop_->runInLoop(std::bind(&Raft::appendLogInloop, this, operation, command));
+    loop_->runInLoop(std::bind(&Raft::appendLogInloop, this, operation, command, id));
 }
 
-void Raft::appendLogInloop(const std::string &operation, const std::string &command) {
+void Raft::appendLogInloop(const std::string &operation, const std::string &command, int64_t id) {
     loop_->assertInLoopThread();
     if (status_ == kLeader) {
         rpcService::AppendEntriesRequest_LogEntry logEntry;
         logEntry.set_term(currentTerm);
         logEntry.set_index(logs_.size());
-        logEntry.set_commandname(operation + command);
+        logEntry.set_commandname(operation + " " + command);
+        indexAndMsgMap_[logEntry.index()] = id;
         logs_.push_back(std::move(logEntry));
 
         LOG_INFO << "add a new log";
@@ -445,18 +467,18 @@ void Raft::appendLogInloop(const std::string &operation, const std::string &comm
 }
 
 InetAddress Raft::getLeader() {
-    if(status_==kLeader){
+    if (status_ == kLeader) {
         return addr_;
-    }else{
-       char * leadertmp = leader;
-       if(strlen(leader)){
-           return InetAddress(0);
-       }
-       char* it = std::find(leadertmp,leadertmp+strlen(leadertmp),':');
-       std::string ip(leadertmp,it);
-       std::string port(it+1,leadertmp+strlen(leadertmp));
-       InetAddress ret (ip.c_str(),atoi(port.c_str()));
-       return ret;
+    } else {
+        char *leadertmp = leader;
+        if (strlen(leader) == 0) {
+            return InetAddress(0);
+        }
+        char *it = std::find(leadertmp, leadertmp + strlen(leadertmp), ':');
+        std::string ip(leadertmp, it);
+        std::string port(it + 1, leadertmp + strlen(leadertmp));
+        InetAddress ret(ip.c_str(), atoi(port.c_str()));
+        return ret;
     }
 }
 

@@ -120,6 +120,7 @@ void RpcChannel::doneService(::google::protobuf::Message *response, int64_t id) 
     rpcMessage.set_type(Rpc::RESPONSE);
     rpcMessage.set_id(id);
     rpcMessage.set_response(response->SerializeAsString()); // FIXME: error check
+    //delete response;
     char message[65535];
     int len;
     codec_.FillBuffer(rpcMessage, message, &len);

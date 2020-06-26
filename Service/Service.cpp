@@ -4,6 +4,7 @@
 
 #include "Service.h"
 
+#include "Util.h"
 Service::Service(EventLoop *eventLoop, const InetAddress &addr, const std::vector<InetAddress> &clientAddrs) :
         baseloop_(eventLoop),
         clients_(clientAddrs),
@@ -31,7 +32,7 @@ void Service::start() {
 }
 
 void Service::appendLog(const std::string &operation, const std::string &command, int64_t id) {
-    raft_->appendLog(operation, command);
+    raft_->appendLog(operation, command,id);
 }
 
 
@@ -44,13 +45,27 @@ Raft::status Service::getState() {
 }
 
 
-void Service::applyCommand(int64_t id, bool commandVaild, const std::string& operation, const std::string& commandName) {
+void Service::applyCommand(int64_t id, bool commandVaild, const std::string& log) {
 
     auto it = waitngResponse_.find(id);
     if (it != waitngResponse_.end()) {
         auto out = it->second;
         waitngResponse_.erase(it);
         auto *response = out.response;
+
+        auto opt =  Utils::splitString(log);
+        assert(opt.size() == 3);
+        if(commandVaild){ //raft apply success
+            if(opt[0] =="set"){
+                data_[atoi(opt[1].c_str())] =  atoi(opt[2].c_str());
+            }
+        }
+
+        auto *kvReponse = static_cast< kvService::kvReponse * >(response);
+        kvReponse->set_operation(opt[0]);
+        kvReponse->set_success(true);
+        kvReponse->set_id(id);
+
         // set true or false
         // response
         out.done->Run();
@@ -69,27 +84,46 @@ void Service::onClientMessage(google::protobuf::RpcController *controller, const
     //commind = reequest.Id
 
     LOG_INFO << kvRequest->operation();
-    LOG_INFO << kvRequest->key();
-    LOG_INFO << kvRequest->value();
+    int key = atoi(kvRequest->key().c_str());
+    int value =  atoi(kvRequest->value().c_str());
+    if(kvRequest->operation() == "get"){
+        kvReponse->set_id(kvRequest->id());
+        kvReponse->set_success(true);
+        kvReponse->set_operation("get");
+        auto it  = data_.find(key);
+        if(it!=data_.end()){
+            int v = it->second;
 
-    if(raft_->getStatus() ==Raft::kLeader){
+            kvReponse->set_value(v);
+            done->Run();
+        }
 
-        int commandId_ = 0;
+    }else if(raft_->getStatus() ==Raft::kLeader){
+
+        int commandId_ = kvRequest->id();
         auto it = waitngResponse_.find(commandId_);
+        LOG_INFO << "-================kvrequest:================";
+        LOG_INFO <<"id:" << kvRequest->id();
         if (it != waitngResponse_.end()) {   // already in
 
-        } else {
-            appendLog( kvRequest->operation(), kvRequest->key(), commandId_);
+
+
+      } else {
+            std::string command = kvRequest->key() + " " + kvRequest->value();
+            appendLog( kvRequest->operation(),command, commandId_);
             waitngResponse waitngResponse = {response, done};
             waitngResponse_[commandId_] = waitngResponse;
+            kvReponse->set_id(commandId_);
         }
 
     }else{
+        kvReponse->set_id(kvRequest->id());
         kvReponse->set_success(false);
-        raft_->getLeader();
+        auto Leaderaddr  = raft_->getLeader();
         std::ostringstream os;
-        os << raft_->getLeader();
+        os << Leaderaddr;
         kvReponse->set_leader(os.str());
+
         done->Run();
     }
 

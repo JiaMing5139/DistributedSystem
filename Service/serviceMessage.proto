@@ -21,6 +21,8 @@ message kvReponse {
     uint64 id=1;
     string leader=2;
     bool success=3;
+    string operation = 4;
+    uint64 value = 5;
 }
 
 

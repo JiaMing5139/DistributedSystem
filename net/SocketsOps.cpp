@@ -45,6 +45,9 @@ int sockets::createNonblockingOrDie(sa_family_t family)
 {
 #ifdef SOCK_NONBLOCK
     int sockfd = ::socket(family, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP);
+    if (sockfd == 100){
+        LOG_INFO<<"warn ning too man socket";
+    }
     if (sockfd < 0)
     {
         LOG_SYSFATAL << "sockets::createNonblockingOrDie";

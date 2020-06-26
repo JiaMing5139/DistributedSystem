@@ -10,7 +10,7 @@
 #include <google/protobuf/message.h>
 #include <map>
 #include <Raft/Raft.h>
-
+#include <unordered_map>
 class EventLoop;
 
 class Service {
@@ -32,7 +32,7 @@ public:
     Raft::status getState();
 
     // applyaLog to Service
-    void applyCommand(int64_t id,bool commandVaild,const std::string& operation,const std::string& commandName);
+    void applyCommand(int64_t id,bool commandVaild,const std::string& log);
 
 
 
@@ -54,6 +54,8 @@ private:
     RpcServer rpcServer_;
     kvServiceImpl kvService1_;
     std::map<int64_t , waitngResponse > waitngResponse_;
+
+    std::unordered_map<int,int> data_;
 
 
 };

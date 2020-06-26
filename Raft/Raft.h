@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <atomic>
+#include <unordered_map>
 #include "Rpc/RpcServer.h"
 #include "RaftServiceImpl.h"
 #include "log/logger.h"
@@ -149,9 +150,9 @@ public:
 
     void start();
 
-    void appendLog(const std::string& operation,const std::string& command);
+    void appendLog(const std::string& operation,const std::string& command,int64_t id);
 
-    void appendLogInloop(const std::string& operation,const std::string& command);
+    void appendLogInloop(const std::string& operation,const std::string& command,int64_t id);
 
     status getStatus(){
         return status_;
@@ -183,6 +184,7 @@ private:
 
     int64_t commitIndex = 0;
     int64_t lastApplied = 0;
+    std::unordered_map<int,int> indexAndMsgMap_; //map  index in log to the msg id from client
 
     std::vector<RpcClientPtr> clients_;
     RaftServiceImpl raftServiceImpl;

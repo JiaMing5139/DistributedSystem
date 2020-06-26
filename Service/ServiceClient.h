@@ -15,7 +15,7 @@
 #include <atomic>
 #include <unistd.h>
 #include "net/TcpClient.h"
-#include "Util.cpp"
+#include "Util.h"
 #include "EventLoop.h"
 class ServiceClient {
 public:
@@ -67,32 +67,54 @@ private:
         auto commands = Utils::splitString(buff,strlen(buff)+1);
         msgId_ ++ ;
         if(commands[0] =="get" ) {
+
+            if(commands.size()!=2){
+                std::cout << "opeartion should be get or set" << "\n";
+                return;
+            }
+            request.set_id(msgId_);
             request.set_operation(commands[0]);
             request.set_key(commands[1]);
 
         }else if(commands[0] =="set"){
+            if(commands.size() != 3){
+                std::cout << "opeartion should be get or set" << "\n";
+                return;
+            }
+            request.set_id(msgId_);
             request.set_operation(commands[0]);
             request.set_key(commands[1]);
-            request.set_operation(commands[0]);
             request.set_value(commands[2]);
         }else{
             std::cout << "opeartion should be get or set" << "\n";
             return ;
         }
 
-        auto retry = loop_->runEvery(5,[&](){
+        auto retry = loop_->runAfter(1,[&](){
             client_.resetConnection();
-           // client_.start();
         });
         LOG_INFO << "request:" << request.operation() << " " << request.key() << " " << request.value() ;
+
+        std::cout << "====== request ======="<<"\n";
+        std::cout << "id:" << request.id() << "\n";
+        std::cout << "id:" << request.operation() << "\n";
         SendRquest(request,[&](google::protobuf::Message *response){
+        //    loop_->cancleTimer(retry);
+
             auto *kvReponse = static_cast<kvService::kvReponse *>(response);
             if(kvReponse->success()){
                 //apply it to memory
                 LOG_INFO<<" Leader:" << kvReponse->leader();
+                if(kvReponse->operation() == "get"){
+                    std::cout << kvReponse->value() << std::endl;
+                }else{
+                    std::cout << "set successfully" << std::endl;
+                }
             }else{
                 LOG_INFO<<" Leader:" << kvReponse->leader();
             }
+
+            client_.resetConnection();
         });
 
 
