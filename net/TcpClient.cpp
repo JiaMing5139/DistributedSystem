@@ -14,9 +14,11 @@ peerAddr(addr)
 
 }
 void TcpClient::disconnect(){
-    status_ = closing;
-    if(tcpConnectionptr_){
-        tcpConnectionptr_->shutdown();
+    if(status_ == connected){
+        status_ = closing;
+        if(tcpConnectionptr_){
+            tcpConnectionptr_->shutdown();
+        }
     }
 }
 
@@ -26,7 +28,6 @@ void TcpClient::start() {
         connector_.setNewConnectionCallback(std::bind(&TcpClient::newConnection,this,std::placeholders::_1));
         connector_.setConnectFaildCallback(std::bind(&TcpClient::connectionFaild,this,std::placeholders::_1));
         connector_.start();
-
     }
 
 }
@@ -61,6 +62,8 @@ void TcpClient::removeTcpConnection() {
         LOG_TRACE << "TcpClient tcpconnection closed" ;
         tcpConnectionptr_.reset();
         status_ =closed;
+        if(onAfterClosed)
+            onAfterClosed();
     }
 
 
@@ -84,4 +87,6 @@ void TcpClient::resetConnection() {
     status_=closed;
 
 }
+
+
 

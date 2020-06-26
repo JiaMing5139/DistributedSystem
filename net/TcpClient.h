@@ -37,12 +37,14 @@ public:
     void setOnMessageCallback(readTcpEventCallback cb){onMessage_ =cb;}
     void setOnConnectionCallback(TcpEventCallback cb){onConnection_ =cb;}
     void setOnWriteCompleteCallback(TcpEventCallback cb){writeCompleteCallback =cb;}
+    void setOnAfterClosed(funcCallback cb){onAfterClosed = cb;}
 private:
     readTcpEventCallback onMessage_;
     InetAddress peerAddr;
     TcpEventCallback onConnection_;
     TcpEventCallback closeCallback;
     TcpEventCallback writeCompleteCallback;
+    funcCallback onAfterClosed;
     void removeTcpConnection();
     void connectionFaild(int);
 

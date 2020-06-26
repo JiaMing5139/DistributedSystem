@@ -86,35 +86,36 @@ void Service::onClientMessage(google::protobuf::RpcController *controller, const
     LOG_INFO << kvRequest->operation();
     int key = atoi(kvRequest->key().c_str());
     int value =  atoi(kvRequest->value().c_str());
-    if(kvRequest->operation() == "get"){
-        kvReponse->set_id(kvRequest->id());
-        kvReponse->set_success(true);
-        kvReponse->set_operation("get");
-        auto it  = data_.find(key);
-        if(it!=data_.end()){
-            int v = it->second;
+    if(raft_->getStatus() ==Raft::kLeader){
 
-            kvReponse->set_value(v);
+        if(kvRequest->operation() == "get"){ //FIXME for dirty data 1. check Leader itself in raft and get data in eventloop
+            if(raft_->getStatus()== Raft::kLeader)
+                kvReponse->set_id(kvRequest->id());
+            kvReponse->set_success(true);
+            kvReponse->set_operation("get");
+            auto it  = data_.find(key);
+            if(it!=data_.end()){
+                int v = it->second;
+                kvReponse->set_value(v);
+            }
             done->Run();
+        }else{
+            int commandId_ = kvRequest->id();
+            auto it = waitngResponse_.find(commandId_);
+            LOG_INFO << "-================kvrequest:================";
+            LOG_INFO <<"id:" << kvRequest->id();
+            if (it != waitngResponse_.end()) {   // already in
+
+            } else {
+                std::string command = kvRequest->key() + " " + kvRequest->value();
+                appendLog( kvRequest->operation(),command, commandId_);
+                waitngResponse waitngResponse = {response, done};
+                waitngResponse_[commandId_] = waitngResponse;
+                kvReponse->set_id(commandId_);
+            }
         }
 
-    }else if(raft_->getStatus() ==Raft::kLeader){
 
-        int commandId_ = kvRequest->id();
-        auto it = waitngResponse_.find(commandId_);
-        LOG_INFO << "-================kvrequest:================";
-        LOG_INFO <<"id:" << kvRequest->id();
-        if (it != waitngResponse_.end()) {   // already in
-
-
-
-      } else {
-            std::string command = kvRequest->key() + " " + kvRequest->value();
-            appendLog( kvRequest->operation(),command, commandId_);
-            waitngResponse waitngResponse = {response, done};
-            waitngResponse_[commandId_] = waitngResponse;
-            kvReponse->set_id(commandId_);
-        }
 
     }else{
         kvReponse->set_id(kvRequest->id());

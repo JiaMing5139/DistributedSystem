@@ -16,6 +16,7 @@
 #include "net/Channel.h"
 #include <string.h>
 #include <unistd.h>
+#include <algorithm>
 #include "base/CallBack.h"
 
 TimerQueuebase::TimerQueuebase(EventLoop *loop) :
@@ -50,7 +51,9 @@ void TimerQueuebase::cancel(const TimerId &id) {
     debugTimerQueue();
     if (timerpair.second) {
         timerpair.second->setRepeat(false);
-        timerList_.erase(timerpair);
+        auto it = std::find(timerList_.begin(),timerList_.end(),timerpair);
+        if(it!= timerList_.end())
+            timerList_.erase(timerpair);
     }
 
 
