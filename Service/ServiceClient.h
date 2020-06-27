@@ -171,7 +171,7 @@ private:
     }
 
 
-    RpcResponseCallback responseCallback_;
+    RpcResponseCallback responseCallback_; //FIXME change it to map<id,responseCallback>
     TimerId retryTimer_;
     std::vector<InetAddress> serverAddrs_;
     std::atomic<int64_t> msgId_;

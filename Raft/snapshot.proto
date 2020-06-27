@@ -1,0 +1,27 @@
+
+
+
+syntax = "proto3";
+option cc_generic_services =true;
+package snapshot;
+
+//enum operation{
+//    GET = 0;
+//    PUT = 2;
+//}
+
+message LogEntry{
+    int64 index = 1;
+    int64 term = 2;
+    string commandName =3 ;
+    //        bytes command = 4;
+}
+
+message snapshot {
+    uint64 lastIndex=1;
+    uint64 lastTerm =2;
+    repeated LogEntry LogEntries = 3;
+}
+
+
+

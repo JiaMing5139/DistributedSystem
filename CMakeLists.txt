@@ -25,7 +25,7 @@ add_executable(Distributed_lab
         ${Raft_LIB_SRCS}
         Raft/State.cpp Raft/State.h Service/Service.cpp Service/Service.h
         Service/ServiceClient.cpp Service/ServiceClient.h
-        Service/kvServiceImpl.cpp Service/kvServiceImpl.h Service/Util.h Service/serviceMessage.pb.h Service/serviceMessage.pb.cc)
+        Service/kvServiceImpl.cpp Service/kvServiceImpl.h Service/Util.h Service/serviceMessage.pb.h Service/serviceMessage.pb.cc Raft/SnapShot.cpp Raft/SnapShot.h Raft/snapshot.pb.cc)
 find_package(Protobuf REQUIRED)
 find_package (Threads REQUIRED)
 target_link_libraries(Distributed_lab

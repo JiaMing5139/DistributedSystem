@@ -14,7 +14,7 @@ Service::Service(EventLoop *eventLoop, const InetAddress &addr, const std::vecto
     EventLoop *RaftLoop = eventLoopThread_.startLoop();
     auto local = clientAddrs.front();
     std::vector<InetAddress> nodes(clientAddrs.begin()+1,clientAddrs.end());
-    raft_ = new Raft(RaftLoop, local, nodes, this);
+    raft_ = new Raft(RaftLoop, local, nodes, this,"snapShot");
 
 
     kvService1_.setonKvCommandMessge(std::bind(&Service::onClientMessage,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,std::placeholders::_4));

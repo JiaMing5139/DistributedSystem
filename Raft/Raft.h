@@ -5,7 +5,7 @@
 #ifndef DISTRIBUTED_LAB_RAFT_H
 #define DISTRIBUTED_LAB_RAFT_H
 
-
+#include "SnapShot.h"
 #include <zconf.h>
 #include <string>
 #include <vector>
@@ -142,9 +142,9 @@ public:
         kLeader
     };
 
-    Raft(EventLoop *eventLoop, const InetAddress &addr);
+    Raft(EventLoop *eventLoop, const InetAddress &addr,const std::string & path);
 
-    Raft(EventLoop *eventLoop, const InetAddress &addr, const std::vector<InetAddress> &clientAddrs,Service *service);
+    Raft(EventLoop *eventLoop, const InetAddress &addr, const std::vector<InetAddress> &clientAddrs,Service *service,const std::string & path);
 
     void debugRaft();
 
@@ -158,6 +158,9 @@ public:
         return status_;
     }
     InetAddress getLeader();
+
+
+    bool snashotLog(size_t len);
 
 private:
     void onAppendEntryMessage(google::protobuf::RpcController *controller,
@@ -199,6 +202,11 @@ private:
     std::atomic<char*> leader;
     TimerId electionTimer;
     TimerId appendEntryTimer;
+
+    SnapShot snapShot_;
+    size_t writedsize_ = 0;
+
+
 
 
 };

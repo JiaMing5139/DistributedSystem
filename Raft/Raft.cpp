@@ -58,22 +58,24 @@ inline double randomTime(int start, int end) {
     return tmp / 100;
 }
 
-Raft::Raft(EventLoop *eventLoop, const InetAddress &addr) :
+Raft::Raft(EventLoop *eventLoop, const InetAddress &addr,const std::string & path) :
         addr_(addr),
         loop_(eventLoop),
         server_(eventLoop, addr),
-        status_(kClosed) {
+        status_(kClosed),
+        snapShot_(path){
 
 }
 
-Raft::Raft(EventLoop *eventLoop, const InetAddress &addr, const std::vector<InetAddress> &clientAddrs, Service *service)
+Raft::Raft(EventLoop *eventLoop, const InetAddress &addr, const std::vector<InetAddress> &clientAddrs, Service *service,const std::string & path)
         :
         addr_(addr),
         loop_(eventLoop),
         server_(eventLoop, addr),
         status_(kClosed),
         service_(service),
-        leader(new char[64]) {
+        leader(new char[64]),
+        snapShot_(path){
     for (auto &addr : clientAddrs) {
         RpcClientPtr clientPtr(new RpcClient(eventLoop, addr));
         clients_.push_back(std::move(clientPtr));
@@ -410,7 +412,6 @@ void Raft::AppendEntryTimeout() {
                                 if (client->matchIndex() == AppendEntriesResponse->index()) {
                                     count++;
                                     if (count > clients_.size() / 2) {
-                                        commitIndex = AppendEntriesResponse->index();
                                         while (commitIndex > lastApplied) {
                                             lastApplied++;
                                             auto id = indexAndMsgMap_[lastApplied];
@@ -418,11 +419,16 @@ void Raft::AppendEntryTimeout() {
                                                                    logs_[lastApplied].commandname());
 
                                         }
+                                        if ( lastApplied - writedsize_ >= 3){
+                                            if(snashotLog(3)){
+                                                writedsize_ += 3;
+                                            }
+                                        }
                                     }
                                 }
                             }
                         } else {
-
+                                    // dont't commit
                         }
                     }
 
@@ -440,6 +446,21 @@ void Raft::AppendEntryTimeout() {
     double delay = t / 10;
     loop_->runAfter(0.2, std::bind(&Raft::AppendEntryTimeout, this));
 
+}
+
+bool Raft::snashotLog(size_t len) {
+    assert(writedsize_ + len <= lastApplied);
+
+    auto old = snapShot_.Read();
+    old.set_lastterm(logs_[lastApplied].term());
+    old.set_lastindex(logs_[lastApplied].index());
+    for(auto  it = logs_.begin()+1;it!=logs_.begin()+1+len;it++){
+        auto added_log = old.add_logentries();
+        added_log->set_index(it->index());
+        added_log->set_commandname(it->commandname());
+        added_log->set_term(it->term());
+    }
+   return snapShot_.Saved(old);
 }
 
 void Raft::appendLog(const std::string &operation, const std::string &command, int64_t id) {
